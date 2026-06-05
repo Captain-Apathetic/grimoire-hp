@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Catalogue des Sorts</title>
+<style>
+  :root {
+    --ink:#2b1b10;
+    --muted:#6d5a43;
+    --purple:#5d1478;
+    --green:#2e6b42;
+    --red:#9b3151;
+    --gold:#9b6b24;
+    --paper:#efe0bd;
+    --paper2:#f7edcf;
+    --shadow:rgba(44, 26, 8, .22);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin:0;
+    color:var(--ink);
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 50% 20%, rgba(255,255,255,.42), transparent 36rem),
+      radial-gradient(circle at 12% 8%, rgba(90,55,12,.14), transparent 18rem),
+      radial-gradient(circle at 90% 84%, rgba(87,53,16,.18), transparent 25rem),
+      linear-gradient(110deg, #c9ab70, #f2dfad 38%, #d5b97c);
+    font-family: Georgia, "Times New Roman", serif;
+    padding: 26px;
+  }
+  body::before {
+    content:"";
+    position:fixed; inset:0; pointer-events:none;
+    opacity:.23;
+    background-image:
+      linear-gradient(90deg, rgba(79,45,10,.09) 1px, transparent 1px),
+      linear-gradient(rgba(79,45,10,.07) 1px, transparent 1px);
+    background-size: 38px 38px;
+    mix-blend-mode:multiply;
+  }
+  .page {
+    max-width: 1480px;
+    margin: 0 auto;
+    background:
+      radial-gradient(circle at 50% 38%, rgba(158,229,174,.25), transparent 18rem),
+      linear-gradient(90deg, rgba(118,81,23,.10), transparent 4%, transparent 96%, rgba(55,32,11,.22)),
+      var(--paper2);
+    border: 1px solid rgba(72,43,14,.35);
+    border-radius: 18px;
+    box-shadow: 0 28px 70px var(--shadow);
+    overflow:visible;
+    position:relative;
+  }
+  .page::after {
+    content:"";
+    position:absolute; inset:0; pointer-events:none; opacity:.18;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(83,41,5,.13) 0 1px, transparent 2px),
+      radial-gradient(circle at 70% 80%, rgba(83,41,5,.13) 0 1px, transparent 2px);
+    background-size: 31px 29px, 43px 41px;
+  }
+  header {
+    padding: 30px 34px 18px;
+    border-bottom: 1px solid rgba(80,45,12,.22);
+    position:relative;
+    z-index:1;
+  }
+  h1 {
+    margin:0;
+    font-size: clamp(2.4rem, 5vw, 4.5rem);
+    letter-spacing:.02em;
+    font-weight: 700;
+    color:#271506;
+    text-shadow: 0 1px 0 #fff2c8;
+    line-height: 1;
+  }
+  .subtitle {
+    margin: 12px 0 0;
+    color:var(--muted);
+    font-style:italic;
+    font-size:1.05rem;
+  }
+  .controls {
+    position:relative;
+    z-index:1;
+    padding: 20px 28px 22px;
+    display:grid;
+    gap:16px;
+    background: rgba(239,224,189,.48);
+    border-bottom: 1px solid rgba(80,45,12,.18);
+  }
+  .search-row {
+    display:grid;
+    grid-template-columns: minmax(240px, 1fr) auto auto;
+    gap:12px;
+    align-items:center;
+  }
+  input, select, button {
+    font: inherit;
+    color:var(--ink);
+    border: 1px solid rgba(71,38,9,.35);
+    background: rgba(255,247,221,.84);
+    border-radius: 999px;
+    padding: 12px 15px;
+    box-shadow: inset 0 1px 2px rgba(74,44,12,.10);
+  }
+  input {
+    width: 100%;
+    padding-left: 42px;
+    background-image: linear-gradient(transparent, transparent);
+  }
+  .searchbox { position: relative; }
+  .searchbox::before {
+    content:"⌕";
+    position:absolute;
+    left:16px;
+    top:50%;
+    transform:translateY(-50%);
+    font-size:1.2rem;
+    color:var(--purple);
+    z-index:2;
+  }
+  button {
+    cursor:pointer;
+    background: linear-gradient(#fff3cc, #e6c98e);
+    font-weight:600;
+  }
+  button:hover { filter:brightness(.98); }
+  .filters {
+    display:grid;
+    grid-template-columns: repeat(6, minmax(160px, 1fr));
+    gap:10px;
+  }
+  .stats {
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px 12px;
+    color:var(--muted);
+    font-size:.95rem;
+    align-items:center;
+  }
+  .pill {
+    border:1px solid rgba(71,38,9,.25);
+    border-radius:999px;
+    padding:6px 10px;
+    background:rgba(255,248,224,.52);
+  }
+  .table-wrap {
+    position:relative;
+    z-index:1;
+    padding: 22px 26px 30px;
+    overflow-x:auto;
+    overflow-y:visible;
+    max-height:none;
+  }
+  table {
+    width:100%;
+    border-collapse:separate;
+    border-spacing:0;
+    min-width:1180px;
+  }
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index:3;
+    padding:12px 10px;
+    text-align:left;
+    font-size:1.05rem;
+    color:#241306;
+    background: linear-gradient(#eddcae, #dec48d);
+    border-top:1px solid rgba(72,43,14,.35);
+    border-bottom:1px solid rgba(72,43,14,.35);
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  thead th:first-child { border-radius:12px 0 0 12px; border-left:1px solid rgba(72,43,14,.35); }
+  thead th:last-child { border-radius:0 12px 12px 0; border-right:1px solid rgba(72,43,14,.35); }
+  tbody tr {
+    background: rgba(255,248,225,.62);
+    box-shadow: 0 2px 9px rgba(67,40,12,.08);
+  }
+  tbody td {
+    padding:12px 10px;
+    vertical-align:top;
+    border-top: 1px solid rgba(74,43,13,.13);
+    border-bottom: 1px solid rgba(74,43,13,.13);
+  }
+  tbody td:first-child {
+    border-left: 1px solid rgba(74,43,13,.13);
+    border-radius:10px 0 0 10px;
+  }
+  tbody td:last-child {
+    border-right: 1px solid rgba(74,43,13,.13);
+    border-radius:0 10px 10px 0;
+  }
+  .spell {
+    color:var(--purple);
+    font-weight:700;
+    font-size:1.08rem;
+    white-space:nowrap;
+  }
+  .desc {
+    color:#594a38;
+    line-height:1.25;
+    min-width:290px;
+  }
+
+  .detail-row {
+    background: rgba(255,248,225,.62);
+    box-shadow: 0 2px 9px rgba(67,40,12,.08);
+  }
+  .detail-row td {
+    padding: 0 18px 12px 34px;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+  }
+  .detail-content {
+    color:#594a38;
+    line-height:1.35;
+    font-style:italic;
+  }
+  .detail-content::before {
+    content:"";
+  }
+  .clarif-line {
+    margin-top:5px;
+    color:#6c604d;
+    font-size:.92rem;
+    font-style:italic;
+  }
+  .level-badge {
+    display:inline-block;
+    min-width:104px;
+    text-align:center;
+    padding:4px 9px;
+    border-radius:999px;
+    font-weight:700;
+    font-size:.88rem;
+    border:1px solid rgba(63,43,12,.22);
+    box-shadow: inset 0 1px 2px rgba(255,255,255,.45);
+  }
+  .level-basique {
+    background:#d9efce;
+    color:#255b24;
+  }
+  .level-intermediaire {
+    background:#f3df8b;
+    color:#6a4a08;
+  }
+  .level-avance {
+    background:#efb0a8;
+    color:#7a1f1a;
+  }
+  .level-other {
+    background:#e7d8b5;
+    color:#4d3c25;
+  }
+  .category-emoji {
+    margin-left:5px;
+    opacity:.92;
+  }
+
+  .tag {
+    display:inline-block;
+    border-radius:999px;
+    padding:3px 8px;
+    background:rgba(108,74,22,.10);
+    border:1px solid rgba(108,74,22,.16);
+    white-space:nowrap;
+  }
+  .car-Corps { color:#b88718; font-weight:700; }
+  .car-Cœur { color:var(--red); font-weight:700; }
+  .car-Esprit { color:#24659a; font-weight:700; }
+  .clarif {
+    color:#6c604d;
+    font-size:.92rem;
+    font-style:italic;
+  }
+  .empty { color:#a18b68; }
+  mark {
+    background:#e6ef9b;
+    color:inherit;
+    padding:0 .08em;
+    border-radius:3px;
+  }
+  .no-results {
+    padding:38px;
+    text-align:center;
+    color:var(--muted);
+    font-style:italic;
+  }
+  footer {
+    position:relative;
+    z-index:1;
+    padding: 0 30px 26px;
+    color:rgba(52,31,10,.65);
+    font-size:.9rem;
+  }
+  
+  thead th:nth-child(2), thead th:nth-child(3), thead th:nth-child(4), thead th:nth-child(5),
+  tbody td:nth-child(2), tbody td:nth-child(3), tbody td:nth-child(4), tbody td:nth-child(5) {
+    text-align:center;
+  }
+
+  .detail-row td {
+    border-bottom: 3px solid rgba(74,43,13,.28);
+    padding-bottom:16px;
+  }
+
+  .detail-row {
+    margin-bottom:6px;
+  }
+
+
+  @media (max-width: 1000px) {
+    body { padding:10px; }
+    .search-row { grid-template-columns:1fr; }
+    .filters { grid-template-columns: 1fr 1fr; }
+    .table-wrap { max-height:none; padding:14px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>Catalogue des Sorts</h1>
+    <p class="subtitle">Grimoire interactif — recherche dans l’incantation, la description et toutes les colonnes.</p>
+  </header>
+
+  <section class="controls">
+    <div class="search-row">
+      <div class="searchbox"><input id="search" type="search" placeholder="Rechercher un sort, une description, un contre-sort, un prérequis…" autocomplete="off"></div>
+      <select id="sortSelect" title="Tri">
+        <option value="Incantation|asc">Tri : Incantation A → Z</option>
+        <option value="Incantation|desc">Tri : Incantation Z → A</option>
+        <option value="Niveau|asc">Tri : Niveau croissant</option>
+        <option value="Niveau|desc">Tri : Niveau décroissant</option>
+        <option value="Catégorie|asc">Tri : Catégorie</option>
+        <option value="Caractéristique|asc">Tri : Caractéristique</option>
+      </select>
+      <button id="reset">Réinitialiser</button>
+    </div>
+    <div class="filters" id="filters"></div>
+    <div class="stats">
+      <span class="pill" id="count"></span>
+      <span class="pill">Astuce : clique sur un en-tête pour trier.</span>
+    </div>
+  </section>
+
+  <main class="table-wrap">
+    <table id="spellTable">
+      <thead><tr id="thead"></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div id="noResults" class="no-results" hidden>Aucun sort ne correspond à la recherche.</div>
+  </main>
+
+  <footer>Colonnes utilisées : premier onglet uniquement, A à J. La colonne K est ignorée.</footer>
+</div>
+
+<script>
+const DATA = [{"Incantation": "Locomotor Mortis", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Corps", "Catégorie": "Attaque", "Découverte": "Programme 3", "Pré-requis": "", "Contre-sort": "T ou Finite", "Description": "Paralyse les jambes de la personne visée", "Clarification": "", "_id": 1}, {"Incantation": "Petrificus Totalus", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Corps", "Catégorie": "Attaque", "Découverte": "Programme 3", "Pré-requis": "", "Contre-sort": "T ou Finite", "Description": "Immobilise totalement le corps de la personne visée à l’exception de ses yeux", "Clarification": "", "_id": 2}, {"Incantation": "Calvorio", "Informulé ?": "", "Niveau": "Basique", "Caractéristique": "Cœur", "Catégorie": "Cours de récré", "Découverte": "Bouche à oreille", "Pré-requis": "", "Contre-sort": "Reparifor", "Description": "La victime perd ses cheveux", "Clarification": "", "_id": 3}, {"Incantation": "Cappilis", "Informulé ?": "", "Niveau": "Basique", "Caractéristique": "Cœur", "Catégorie": "Cours de récré", "Découverte": "Bouche à oreille", "Pré-requis": "", "Contre-sort": "Reparifor", "Description": "Fait pousser les cheveux, les sourcils et la barbe - si elle en a - de la cible", "Clarification": "", "_id": 4}, {"Incantation": "Dentes Augmento", "Informulé ?": "", "Niveau": "Basique", "Caractéristique": "Cœur", "Catégorie": "Cours de récré", "Découverte": "Bouche à oreille", "Pré-requis": "", "Contre-sort": "Reparifor", "Description": "Fait pousser les dents de façon démesurées", "Clarification": "", "_id": 5}, {"Incantation": "Halitosis", "Informulé ?": "", "Niveau": "Basique", "Caractéristique": "Cœur", "Catégorie": "Cours de récré", "Découverte": "Bouche à oreille", "Pré-requis": "", "Contre-sort": "T ou Reparifor", "Description": "Provoque à la cible une extrême mauvaise haleine", "Clarification": "", "_id": 6}, {"Incantation": "Limacius Eructo", "Informulé ?": "", "Niveau": "Basique", "Caractéristique": "Cœur", "Catégorie": "Cours de récré", "Découverte": "Bouche à oreille", "Pré-requis": "", "Contre-sort": "T", "Description": "La victime se met instantanément à vomir et à cracher des limaces", "Clarification": "", "_id": 7}, {"Incantation": "Mucus Ad Nauseam", "Informulé ?": "", "Niveau": "Basique", "Caractéristique": "Cœur", "Catégorie": "Cours de récré", "Découverte": "Bouche à oreille", "Pré-requis": "", "Contre-sort": "T ou Finite", "Description": "Fait abondamment couler le nez de la personne visée", "Clarification": "", "_id": 8}, {"Incantation": "Brachialigo", "Informulé ?": "", "Niveau": "Basique", "Caractéristique": "Corps", "Catégorie": "Cours de récré", "Découverte": "Bouche à oreille", "Pré-requis": "", "Contre-sort": "T ou Lashlabask", "Description": "Ligote les bras de la victime", "Clarification": "", "_id": 9}, {"Incantation": "Colloshoo", "Informulé ?": "", "Niveau": "Basique", "Caractéristique": "Corps", "Catégorie": "Cours de récré", "Découverte": "Bouche à oreille", "Pré-requis": "", "Contre-sort": "T ou Finite", "Description": "Colle les chaussures d’une personne au sol", "Clarification": "", "_id": 10}, {"Incantation": "Crocenpate", "Informulé ?": "", "Niveau": "Basique", "Caractéristique": "Corps", "Catégorie": "Cours de récré", "Découverte": "Bouche à oreille", "Pré-requis": "", "Contre-sort": "", "Description": "Fait un croche-patte à la cible", "Clarification": "", "_id": 11}, {"Incantation": "Folloreille", "Informulé ?": "", "Niveau": "Basique", "Caractéristique": "Corps", "Catégorie": "Cours de récré", "Découverte": "Bouche à oreille", "Pré-requis": "", "Contre-sort": "T ou Finite", "Description": "Tire les oreilles de la cible chacune dans une direction différente", "Clarification": "", "_id": 12}, {"Incantation": "Furonculus", "Informulé ?": "", "Niveau": "Basique", "Caractéristique": "Corps", "Catégorie": "Cours de récré", "Découverte": "Bouche à oreille", "Pré-requis": "", "Contre-sort": "Reparifor", "Description": "Fait pousser des furoncles violacés sur la personne visée", "Clarification": "", "_id": 13}, {"Incantation": "Glutinum Perenesis", "Informulé ?": "", "Niveau": "Basique", "Caractéristique": "Corps", "Catégorie": "Cours de récré", "Découverte": "Bouche à oreille", "Pré-requis": "", "Contre-sort": "Reparifor", "Description": "Colle les doigts de la cible ensemble", "Clarification": "Les doigts de pieds également", "_id": 14}, {"Incantation": "Locomotor Wibbly", "Informulé ?": "", "Niveau": "Basique", "Caractéristique": "Corps", "Catégorie": "Cours de récré", "Découverte": "Bouche à oreille", "Pré-requis": "", "Contre-sort": "T ou Finite", "Description": "Fait perdre l'équilibre à la cible de manière à ce qu'elle ne tienne plus debout", "Clarification": "", "_id": 15}, {"Incantation": "Rictusempra", "Informulé ?": "", "Niveau": "Basique", "Caractéristique": "Corps", "Catégorie": "Cours de récré", "Découverte": "Bouche à oreille", "Pré-requis": "", "Contre-sort": "T ou Finite", "Description": "Chatouille la cible sur l’intégralité de son corps", "Clarification": "", "_id": 16}, {"Incantation": "Tarentallegra", "Informulé ?": "", "Niveau": "Basique", "Caractéristique": "Corps", "Catégorie": "Cours de récré", "Découverte": "Bouche à oreille", "Pré-requis": "", "Contre-sort": "T ou Finite", "Description": "Les jambes de la victime se mettent à danser de manière incontrôlée", "Clarification": "", "_id": 17}, {"Incantation": "Tire-Slip", "Informulé ?": "", "Niveau": "Basique", "Caractéristique": "Corps", "Catégorie": "Cours de récré", "Découverte": "Bouche à oreille", "Pré-requis": "", "Contre-sort": "T ou Finite", "Description": "Tire vers le haut l'arrière du sous-vêtement de la victime", "Clarification": "Ne produit aucun effet si la cible ne porte pas de sous-vêtement", "_id": 18}, {"Incantation": "Conseco", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Cœur", "Catégorie": "Domestique", "Découverte": "Adulte", "Pré-requis": "Potions 2", "Contre-sort": "", "Description": "Permet d'émincer avec précision des aliments ou des ingredients", "Clarification": "Un sorcier expérimenté peut choisir précisement le type de coupe", "_id": 19}, {"Incantation": "Doublure", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Cœur", "Catégorie": "Domestique", "Découverte": "Adulte", "Pré-requis": "", "Contre-sort": "T", "Description": "Rends un vêtement ou un accessoire plus chaud", "Clarification": "", "_id": 20}, {"Incantation": "Frechadontis", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Cœur", "Catégorie": "Domestique", "Découverte": "Adulte", "Pré-requis": "", "Contre-sort": "", "Description": "Sortilège pour se brosser les dents instantanément et se redonner bonne haleine", "Clarification": "", "_id": 21}, {"Incantation": "Lectus", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Cœur", "Catégorie": "Domestique", "Découverte": "Adulte", "Pré-requis": "", "Contre-sort": "", "Description": "Permet de faire son lit instantanément", "Clarification": "", "_id": 22}, {"Incantation": "Pulvis", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Cœur", "Catégorie": "Domestique", "Découverte": "Adulte", "Pré-requis": "", "Contre-sort": "", "Description": "Permet de faire disparaître de la poussière", "Clarification": "", "_id": 23}, {"Incantation": "Scutella", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Cœur", "Catégorie": "Domestique", "Découverte": "Adulte", "Pré-requis": "", "Contre-sort": "", "Description": "Donne un coup de fer à repasser sur ses vêtements", "Clarification": "", "_id": 24}, {"Incantation": "Squalens", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Cœur", "Catégorie": "Domestique", "Découverte": "Adulte", "Pré-requis": "", "Contre-sort": "", "Description": "Permet de nettoyer de la vaisselle", "Clarification": "", "_id": 25}, {"Incantation": "Renodis", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Cœur", "Catégorie": "Domestique", "Découverte": "Bouche à oreille", "Pré-requis": "", "Contre-sort": "", "Description": "Tresse les cheveux de la cible selon la volonté du lanceur", "Clarification": "", "_id": 26}, {"Incantation": "Recurvite", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Cœur", "Catégorie": "Domestique", "Découverte": "Programme 3", "Pré-requis": "", "Contre-sort": "", "Description": "Nettoie rapidement et superficiellement un objet", "Clarification": "", "_id": 27}, {"Incantation": "Failamalle", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Corps", "Catégorie": "Domestique", "Découverte": "Programme 2", "Pré-requis": "", "Contre-sort": "", "Description": "Range le ou les objets ciblés", "Clarification": "", "_id": 28}, {"Incantation": "Subtilitas", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Esprit", "Catégorie": "Domestique", "Découverte": "Bibliothèque", "Pré-requis": "Potions 2", "Contre-sort": "", "Description": "Ajuste au degrés près la température d'un chaudron", "Clarification": "", "_id": 29}, {"Incantation": "Ministasis", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Esprit", "Catégorie": "Domestique", "Découverte": "Bibliothèque", "Pré-requis": "", "Contre-sort": "T", "Description": "Ralentit la péremption d’un aliment", "Clarification": "", "_id": 30}, {"Incantation": "Repurgo", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Esprit", "Catégorie": "Domestique", "Découverte": "Bibliothèque", "Pré-requis": "", "Contre-sort": "", "Description": "Permet de purger une tâche d'encre d'un parchemin ou d'un livre", "Clarification": "", "_id": 31}, {"Incantation": "Coloribam", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Cœur", "Catégorie": "Métamorphose", "Découverte": "Bouche à oreille", "Pré-requis": "", "Contre-sort": "T ou Finite", "Description": "Ravive les couleurs d'un vêtement et le rends plus attrayant aux yeux des autres", "Clarification": "", "_id": 32}, {"Incantation": "Scintille", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Cœur", "Catégorie": "Métamorphose", "Découverte": "Bouche à oreille", "Pré-requis": "", "Contre-sort": "T ou Finite", "Description": "Fait légèrement scintiller l'objet ou la partie du corps visée comme des paillettes", "Clarification": "", "_id": 33}, {"Incantation": "Coloris Mutantis", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Esprit", "Catégorie": "Métamorphose", "Découverte": "Bibliothèque", "Pré-requis": "", "Contre-sort": "T ou Finite", "Description": "Permet de changer la couleur d'une petite cible temporairement", "Clarification": "", "_id": 34}, {"Incantation": "Imago Obscuro", "Informulé ?": "", "Niveau": "Basique", "Caractéristique": "Esprit", "Catégorie": "Métamorphose", "Découverte": "Bibliothèque", "Pré-requis": "", "Contre-sort": "T ou Finite", "Description": "Obscurcit un texte ou une image temporairement", "Clarification": "", "_id": 35}, {"Incantation": "Aiguillato", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Esprit", "Catégorie": "Métamorphose", "Découverte": "Programme 2", "Pré-requis": "", "Contre-sort": "T ou Finite", "Description": "Transforme un petit objet fin en aiguille ou en allumette", "Clarification": "", "_id": 36}, {"Incantation": "Animafors", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Esprit", "Catégorie": "Métamorphose", "Découverte": "Programme 3", "Pré-requis": "", "Contre-sort": "T ou Reparifor", "Description": "Transforme un petit animal en objet similaire", "Clarification": "Un hérisson en pelote d'épingle par exemple", "_id": 37}, {"Incantation": "Gravitas", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Esprit", "Catégorie": "Métamorphose", "Découverte": "Programme 3", "Pré-requis": "", "Contre-sort": "", "Description": "Alourdi un objet progressivement", "Clarification": "L'objet est de plus en plus difficile à alourdir au fur et à mesure du processus", "_id": 38}, {"Incantation": "Pondere", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Esprit", "Catégorie": "Métamorphose", "Découverte": "Programme 3", "Pré-requis": "", "Contre-sort": "", "Description": "Allège un objet progressivement", "Clarification": "L’objet est de plus en plus difficile à alléger au fur et à mesure du processus", "_id": 39}, {"Incantation": "Cilo Onis", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Cœur", "Catégorie": "Soin", "Découverte": "Bibliothèque", "Pré-requis": "Cœur 2", "Contre-sort": "", "Description": "Calme les effets d'une migraine", "Clarification": "", "_id": 40}, {"Incantation": "Cruor Nasus", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Cœur", "Catégorie": "Soin", "Découverte": "Bibliothèque", "Pré-requis": "Cœur 2", "Contre-sort": "", "Description": "Arrête un saignement de nez", "Clarification": "", "_id": 41}, {"Incantation": "Oblitesco", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Cœur", "Catégorie": "Soin", "Découverte": "Bibliothèque", "Pré-requis": "", "Contre-sort": "", "Description": "Fait disparaître les petits bleus et hématomes", "Clarification": "", "_id": 42}, {"Incantation": "Sanitur", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Cœur", "Catégorie": "Soin", "Découverte": "Bibliothèque", "Pré-requis": "Cœur 2", "Contre-sort": "", "Description": "Désinfecte une blessure", "Clarification": "", "_id": 43}, {"Incantation": "Somnus", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Cœur", "Catégorie": "Soin", "Découverte": "Bibliothèque", "Pré-requis": "Cœur 2", "Contre-sort": "T", "Description": "Anesthésie une petite zone", "Clarification": "", "_id": 44}, {"Incantation": "Episkey", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Cœur", "Catégorie": "Soin", "Découverte": "Programme 1", "Pré-requis": "", "Contre-sort": "", "Description": "Soigne une petite blessure superficielle", "Clarification": "", "_id": 45}, {"Incantation": "Revigor", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Cœur", "Catégorie": "Soin", "Découverte": "Programme 2", "Pré-requis": "", "Contre-sort": "", "Description": "Redonne un peu d’énergie à la personne ciblé", "Clarification": "", "_id": 46}, {"Incantation": "Boistic", "Informulé ?": "", "Niveau": "Basique", "Caractéristique": "Cœur", "Catégorie": "Sortilège", "Découverte": "Professionnel", "Pré-requis": "Vol 1", "Contre-sort": "", "Description": "Traite le bois d'un balai magique. Moins efficace qu'un kit d'entretien", "Clarification": "Un balai bien entretenu est plus efficace", "_id": 47}, {"Incantation": "Scomniscitum", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Cœur", "Catégorie": "Sortilège", "Découverte": "Bibliothèque", "Pré-requis": "", "Contre-sort": "", "Description": "Créé un champ de tranquilité sensorielle autour du lanceur, lui permettant de se concentrer ou de méditer", "Clarification": "", "_id": 48}, {"Incantation": "Reditio Pila", "Informulé ?": "", "Niveau": "Basique", "Caractéristique": "Corps", "Catégorie": "Sortilège", "Découverte": "Professionnel", "Pré-requis": "Vol 1", "Contre-sort": "", "Description": "Fait revenir les balles de quidditch dans leur malle", "Clarification": "", "_id": 49}, {"Incantation": "Erigo", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Corps", "Catégorie": "Sortilège", "Découverte": "Adulte", "Pré-requis": "", "Contre-sort": "", "Description": "Monte une tente ou un chapiteau", "Clarification": "", "_id": 50}, {"Incantation": "Defodio", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Corps", "Catégorie": "Sortilège", "Découverte": "Bibliothèque", "Pré-requis": "", "Contre-sort": "", "Description": "Permet de creuser ou élargir un tunnel", "Clarification": "", "_id": 51}, {"Incantation": "Fenestra", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Corps", "Catégorie": "Sortilège", "Découverte": "Bibliothèque", "Pré-requis": "", "Contre-sort": "", "Description": "Brise le verre d’une vitre", "Clarification": "", "_id": 52}, {"Incantation": "Closura", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Corps", "Catégorie": "Sortilège", "Découverte": "Programme 2", "Pré-requis": "", "Contre-sort": "", "Description": "Permet de fermer ou verrouiller une porte", "Clarification": "", "_id": 53}, {"Incantation": "Luna Emergo", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Bibliothèque", "Pré-requis": "Astronomie 1", "Contre-sort": "T ou Finite", "Description": "Fait apparaître une petite projection de ce à quoi va ressembler la lune lors de la prochaine nuit", "Clarification": "", "_id": 54}, {"Incantation": "Scriptum", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Bibliothèque", "Pré-requis": "Esprit 2", "Contre-sort": "", "Description": "Permet d'utiliser sa baguette magique pour écrire dans les airs", "Clarification": "", "_id": 55}, {"Incantation": "Repleo", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Bibliothèque", "Pré-requis": "Sorts 2", "Contre-sort": "", "Description": "Remplit le contenant ciblé avec le même liquide que le dernier contenu", "Clarification": "Ne fonctionne pas sur les potions", "_id": 56}, {"Incantation": "Septemtrio", "Informulé ?": "", "Niveau": "Basique", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Bibliothèque", "Pré-requis": "Sorts 2", "Contre-sort": "T", "Description": "La baguette pointe le point cardinal ciblé", "Clarification": "", "_id": 57}, {"Incantation": "Ampliphono", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Bibliothèque", "Pré-requis": "", "Contre-sort": "T", "Description": "Amplifie légèrement les sons provenant de l'endroit ciblé par la baguette", "Clarification": "", "_id": 58}, {"Incantation": "Converti", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Bibliothèque", "Pré-requis": "", "Contre-sort": "T ou Finite", "Description": "Grossit le texte d'une page", "Clarification": "", "_id": 59}, {"Incantation": "Digita Revelio", "Informulé ?": "", "Niveau": "Basique", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Bibliothèque", "Pré-requis": "", "Contre-sort": "", "Description": "Fait ressortir les empreintes récemment faites sur une surface", "Clarification": "", "_id": 60}, {"Incantation": "Duplicata", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Bibliothèque", "Pré-requis": "", "Contre-sort": "", "Description": "Copie un texte sur un autre support", "Clarification": "", "_id": 61}, {"Incantation": "Impervius", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Bibliothèque", "Pré-requis": "", "Contre-sort": "T ou Finite", "Description": "Rends imperméable l’objet ciblé", "Clarification": "", "_id": 62}, {"Incantation": "Tempus", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Bibliothèque", "Pré-requis": "", "Contre-sort": "T", "Description": "Fait apparaître l'heure brièvement", "Clarification": "", "_id": 63}, {"Incantation": "Alohomora", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Programme 1", "Pré-requis": "", "Contre-sort": "", "Description": "Déverrouille une porte fermée à clef", "Clarification": "Une porte fermée à clef, si fermée avec un sortilège le sort sera plus difficile", "_id": 64}, {"Incantation": "Lumos", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Programme 1", "Pré-requis": "", "Contre-sort": "T ou Finite", "Description": "Produit de la lumière au bout de la baguette", "Clarification": "", "_id": 65}, {"Incantation": "Wingardium Leviosa", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Programme 1", "Pré-requis": "", "Contre-sort": "T", "Description": "Permet de déplacer dans les airs un objet", "Clarification": "", "_id": 66}, {"Incantation": "Periculum", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Programme 2", "Pré-requis": "", "Contre-sort": "", "Description": "Projette en l’air des étincelles de couleur", "Clarification": "", "_id": 67}, {"Incantation": "Reparo", "Informulé ?": "O", "Niveau": "Basique", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Programme 2", "Pré-requis": "", "Contre-sort": "", "Description": "Répare un petit objet cassé", "Clarification": "", "_id": 68}, {"Incantation": "... Exumaï", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Cœur", "Catégorie": "Attaque", "Découverte": "Professionnel", "Pré-requis": "Soins 3", "Contre-sort": "", "Description": "Repousse l’animal ciblé, commencer l'incantation par le nom de l'animal", "Clarification": "Repousse un animal réel, et non un animal invoqué", "_id": 69}, {"Incantation": "Confundo", "Informulé ?": "", "Niveau": "Intermédiaire", "Caractéristique": "Cœur", "Catégorie": "Attaque", "Découverte": "Adulte", "Pré-requis": "", "Contre-sort": "Enervatum", "Description": "Met la cible dans un état de confusion plus ou moins avancé", "Clarification": "", "_id": 70}, {"Incantation": "Oppugno", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Cœur", "Catégorie": "Attaque", "Découverte": "Bibliothèque", "Pré-requis": "", "Contre-sort": "T ou Finite", "Description": "Donne l’ordre à des oiseaux invoqués d’attaquer la cible", "Clarification": "", "_id": 71}, {"Incantation": "Expelliarmus", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Corps", "Catégorie": "Attaque", "Découverte": "Programme 3", "Pré-requis": "", "Contre-sort": "", "Description": "Désarme un adversaire", "Clarification": "", "_id": 72}, {"Incantation": "Levicorpus", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Corps", "Catégorie": "Attaque", "Découverte": "Adulte", "Pré-requis": "Force 2", "Contre-sort": "T ou Finite", "Description": "La cible est pendue dans les airs par les pieds", "Clarification": "", "_id": 73}, {"Incantation": "Diffindo", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Corps", "Catégorie": "Attaque", "Découverte": "Adulte", "Pré-requis": "", "Contre-sort": "", "Description": "Permet de découper ou de lacérer toutes sortes de choses", "Clarification": "", "_id": 74}, {"Incantation": "Impedimenta", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Corps", "Catégorie": "Attaque", "Découverte": "Programme 5", "Pré-requis": "", "Contre-sort": "T", "Description": "Arrête quelques instants une cible en mouvement", "Clarification": "", "_id": 75}, {"Incantation": "Reducto", "Informulé ?": "", "Niveau": "Intermédiaire", "Caractéristique": "Corps", "Catégorie": "Attaque", "Découverte": "Programme 5", "Pré-requis": "", "Contre-sort": "", "Description": "Réduit un objet solide en miette", "Clarification": "", "_id": 76}, {"Incantation": "Silencio", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Corps", "Catégorie": "Attaque", "Découverte": "Programme 5", "Pré-requis": "DCFM 3", "Contre-sort": "T", "Description": "Rend la cible muette quelques instants", "Clarification": "", "_id": 77}, {"Incantation": "Stupefix", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Corps", "Catégorie": "Attaque", "Découverte": "Programme 4", "Pré-requis": "", "Contre-sort": "Enervatum", "Description": "La cible tombe dans un état proche du coma", "Clarification": "", "_id": 78}, {"Incantation": "Glacius", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Corps", "Catégorie": "Attaque", "Découverte": "Bibliothèque", "Pré-requis": "", "Contre-sort": "T", "Description": "Le sorcier fait sortir de sa baguette un courant d'air glacial", "Clarification": "", "_id": 79}, {"Incantation": "X ...sortia", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Corps", "Catégorie": "Attaque", "Découverte": "Bibliothèque", "Pré-requis": "", "Contre-sort": "x Evanesca", "Description": "Fait apparaître un animal petit à moyen qui attaque la cible", "Clarification": "", "_id": 80}, {"Incantation": "Expulso", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Corps", "Catégorie": "Attaque", "Découverte": "Bouche à oreille", "Pré-requis": "", "Contre-sort": "", "Description": "Provoque une petite explosion proche de la cible", "Clarification": "Mais pas directement sur elle", "_id": 81}, {"Incantation": "Enervatum", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Cœur", "Catégorie": "Contre-sort", "Découverte": "Programme 5", "Pré-requis": "", "Contre-sort": "", "Description": "Redonne connaissance à une victime du sortilège Stupefix ou a quelqu'un inconscient", "Clarification": "", "_id": 82}, {"Incantation": "x Evanesca", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Cœur", "Catégorie": "Contre-sort", "Découverte": "Bibliothèque", "Pré-requis": "", "Contre-sort": "", "Description": "Fait disparaître un animal convoqué", "Clarification": "", "_id": 83}, {"Incantation": "Reparifor", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Cœur", "Catégorie": "Contre-sort", "Découverte": "Programme 5", "Pré-requis": "", "Contre-sort": "", "Description": "Annule les effets d'une modification physique de nature magique sur une cible vivante", "Clarification": "", "_id": 84}, {"Incantation": "Lashlabask", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Corps", "Catégorie": "Contre-sort", "Découverte": "Bibliothèque", "Pré-requis": "Agilité 3", "Contre-sort": "", "Description": "Libère de liens, d’entraves y compris magique", "Clarification": "", "_id": 85}, {"Incantation": "Solvo Sigillum", "Informulé ?": "", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Contre-sort", "Découverte": "Bibliothèque", "Pré-requis": "Esprit 4", "Contre-sort": "", "Description": "Un contre-sort permettant de briser un sceau de protection créé par le lanceur", "Clarification": "", "_id": 86}, {"Incantation": "Finite", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Contre-sort", "Découverte": "Programme 4", "Pré-requis": "", "Contre-sort": "", "Description": "Annule certains sorts à l’effet durable ou permanent", "Clarification": "", "_id": 87}, {"Incantation": "Oscausi", "Informulé ?": "", "Niveau": "Intermédiaire", "Caractéristique": "Cœur", "Catégorie": "Cours de récré", "Découverte": "Bouche à oreille", "Pré-requis": "", "Contre-sort": "T ou Reparifor", "Description": "Fait disparaître la bouche de quelqu'un", "Clarification": "", "_id": 88}, {"Incantation": "Retrorsum", "Informulé ?": "", "Niveau": "Intermédiaire", "Caractéristique": "Cœur", "Catégorie": "Cours de récré", "Découverte": "Bouche à oreille", "Pré-requis": "", "Contre-sort": "T ou Finite", "Description": "Force la cible à tout faire à l'envers : parler, marcher, écrire, etc..", "Clarification": "", "_id": 89}, {"Incantation": "Barba", "Informulé ?": "", "Niveau": "Intermédiaire", "Caractéristique": "Cœur", "Catégorie": "Cours de récré", "Découverte": "Bouche à oreille", "Pré-requis": "", "Contre-sort": "Reparifor", "Description": "Fait pousser une longue barbe sur la cible, peu importe son âge ou son genre", "Clarification": "", "_id": 90}, {"Incantation": "Enflatis", "Informulé ?": "", "Niveau": "Intermédiaire", "Caractéristique": "Cœur", "Catégorie": "Cours de récré", "Découverte": "Bouche à oreille", "Pré-requis": "", "Contre-sort": "Reparifor", "Description": "Fait gonfler la victime comme un ballon d'hélium", "Clarification": "", "_id": 91}, {"Incantation": "Melefors", "Informulé ?": "", "Niveau": "Intermédiaire", "Caractéristique": "Corps", "Catégorie": "Cours de récré", "Découverte": "Bouche à oreille", "Pré-requis": "", "Contre-sort": "T ou Reparifor", "Description": "Transforme la tête de la victime en citrouille", "Clarification": "", "_id": 92}, {"Incantation": "Chauve-Furie", "Informulé ?": "", "Niveau": "Intermédiaire", "Caractéristique": "Corps", "Catégorie": "Cours de récré", "Découverte": "Bouche à oreille", "Pré-requis": "Intimidation 3", "Contre-sort": "T", "Description": "Fait sortir des chauves souris du nez de la cible", "Clarification": "", "_id": 93}, {"Incantation": "Patatras", "Informulé ?": "", "Niveau": "Intermédiaire", "Caractéristique": "Corps", "Catégorie": "Cours de récré", "Découverte": "Bouche à oreille", "Pré-requis": "Métamorphose 3", "Contre-sort": "T", "Description": "Transforme un objet sur lequel il est habituel de s'assoir en petite catapulte", "Clarification": "", "_id": 94}, {"Incantation": "Protego", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Corps", "Catégorie": "Défense", "Découverte": "Programme 3", "Pré-requis": "DCFM 3", "Contre-sort": "", "Description": "Protège le lanceur d'un sort si lancé au bon moment", "Clarification": "", "_id": 95}, {"Incantation": "Devia", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Corps", "Catégorie": "Défense", "Découverte": "Programme 5", "Pré-requis": "Agilité 3", "Contre-sort": "", "Description": "Permet de dévier une attaque si lancé au bon moment", "Clarification": "", "_id": 96}, {"Incantation": "Interluo", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Cœur", "Catégorie": "Domestique", "Découverte": "Adulte", "Pré-requis": "", "Contre-sort": "", "Description": "Lave le sol parfaitement sur une grande surface", "Clarification": "", "_id": 97}, {"Incantation": "Misempli", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Cœur", "Catégorie": "Domestique", "Découverte": "Adulte", "Pré-requis": "", "Contre-sort": "", "Description": "Fais pousser ses cheveux jusqu'à la longueur souhaitée", "Clarification": "", "_id": 98}, {"Incantation": "Tergeo", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Cœur", "Catégorie": "Domestique", "Découverte": "Adulte", "Pré-requis": "Cœur 3", "Contre-sort": "", "Description": "Nettoie parfaitement la cible", "Clarification": "", "_id": 99}, {"Incantation": "Perflatus", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Cœur", "Catégorie": "Domestique", "Découverte": "Bibliothèque", "Pré-requis": "", "Contre-sort": "", "Description": "Permet d'aérer une pièce sans ouvrir de fenêtre", "Clarification": "", "_id": 100}, {"Incantation": "Meliorocculus", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Cœur", "Catégorie": "Domestique", "Découverte": "Adulte", "Pré-requis": "Observation 3", "Contre-sort": "T", "Description": "Améliore la vue du lanceur pour se passer de lunettes", "Clarification": "Deviens inconfortable si porté plus de 24h sans pause", "_id": 101}, {"Incantation": "Publicus", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Cœur", "Catégorie": "Domestique", "Découverte": "Adulte", "Pré-requis": "Persuasion 3", "Contre-sort": "", "Description": "Sort de rafraichissement de son apparence", "Clarification": "Remet ses cheveux en place, réapplique son maquillage, réajuste ses vêtements", "_id": 102}, {"Incantation": "Ras-le-bouc", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Cœur", "Catégorie": "Domestique", "Découverte": "Adulte", "Pré-requis": "", "Contre-sort": "", "Description": "Rase nettement la barbe du lanceur", "Clarification": "", "_id": 103}, {"Incantation": "Sunbloc", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Cœur", "Catégorie": "Domestique", "Découverte": "Adulte", "Pré-requis": "", "Contre-sort": "T", "Description": "Permet de se protéger des coups de soleil", "Clarification": "", "_id": 104}, {"Incantation": "Mixtio", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Domestique", "Découverte": "Adulte", "Pré-requis": "Potions 4", "Contre-sort": "", "Description": "Permer de remuer un plat ou une potion tant que le lanceur le souhaite", "Clarification": "", "_id": 105}, {"Incantation": "Stasis", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Domestique", "Découverte": "Professionnel", "Pré-requis": "Sorts 5", "Contre-sort": "Finite", "Description": "Permet de conserver une cible non vivante dans un état figé, imperissable", "Clarification": "", "_id": 106}, {"Incantation": "Cheveuchanger", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Cœur", "Catégorie": "Métamorphose", "Découverte": "Adulte", "Pré-requis": "", "Contre-sort": "Reparifor", "Description": "Change la couleur des cheveux du lanceur", "Clarification": "", "_id": 107}, {"Incantation": "Pervolitio", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Cœur", "Catégorie": "Métamorphose", "Découverte": "Bibliothèque", "Pré-requis": "Cœur 3", "Contre-sort": "Finite", "Description": "Permet d'animer un dessin", "Clarification": "", "_id": 108}, {"Incantation": "Pellitus", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Cœur", "Catégorie": "Métamorphose", "Découverte": "Professionnel", "Pré-requis": "Métamorphose 3", "Contre-sort": "T ou Reparifor", "Description": "Transforme un animal en vêtement fait de la même fourrure", "Clarification": "", "_id": 109}, {"Incantation": "Cameleo", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Cœur", "Catégorie": "Métamorphose", "Découverte": "Professionnel", "Pré-requis": "Discrétion 4", "Contre-sort": "T ou Finite", "Description": "La cible prend l’apparence de ce qui est derrière lui, la rendant invisible à moins d'une observation attentive", "Clarification": "", "_id": 110}, {"Incantation": "Vera Verto", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Cœur", "Catégorie": "Métamorphose", "Découverte": "Programme 4", "Pré-requis": "", "Contre-sort": "T ou Reparifor", "Description": "Transforme l’animal ciblé en verre ou en gobelet", "Clarification": "Plus le sort est réussi, plus le contenant est de qualité", "_id": 111}, {"Incantation": "Duro", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Métamorphose", "Découverte": "Programme 4", "Pré-requis": "", "Contre-sort": "Finite", "Description": "L'objet visé prend la consistance d'une pierre", "Clarification": "", "_id": 112}, {"Incantation": "Amplificatum", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Métamorphose", "Découverte": "Programme 5", "Pré-requis": "Métamorphose 4", "Contre-sort": "Finite ou Reparifor", "Description": "Augmente la taille de l’objet, la personne ou de l’animal ciblé", "Clarification": "", "_id": 113}, {"Incantation": "Reducio", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Métamorphose", "Découverte": "Programme 5", "Pré-requis": "Métamorphose 4", "Contre-sort": "T ou Reparifor", "Description": "Réduit la taille de l’objet ou de l’animal ciblé", "Clarification": "", "_id": 114}, {"Incantation": "Superficies", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Métamorphose", "Découverte": "Professionnel", "Pré-requis": "Métamorphose 5", "Contre-sort": "Finite", "Description": "Transforme un mobilier basique en un autre meuble tel qu'une chaise, un lit, une table, etc..", "Clarification": "", "_id": 115}, {"Incantation": "Duallis", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Métamorphose", "Découverte": "Bibliothèque", "Pré-requis": "", "Contre-sort": "T ou Finite", "Description": "Transforme une surface plane en miroir", "Clarification": "", "_id": 116}, {"Incantation": "Plumate", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Métamorphose", "Découverte": "Bibliothèque", "Pré-requis": "", "Contre-sort": "T ou Finite", "Description": "Transforme une surface dure en coussin", "Clarification": "", "_id": 117}, {"Incantation": "Percallesco", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Métamorphose", "Découverte": "Professionnel", "Pré-requis": "Endurance 3", "Contre-sort": "T", "Description": "Le vêtement ou l'accessoire ciblé absorbe mieux les chocs", "Clarification": "", "_id": 118}, {"Incantation": "Collato", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Métamorphose", "Découverte": "Réserve", "Pré-requis": "", "Contre-sort": "", "Description": "Permet de coller l'objet ciblé à un autre objet ou une surface indéfiniment", "Clarification": "", "_id": 119}, {"Incantation": "Salvio Sonus", "Informulé ?": "", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Sceau de protection", "Découverte": "Bibliothèque", "Pré-requis": "Sorts 5", "Contre-sort": "Solvo Sigillum ou Custodia Absolvo", "Description": "Empêche des sons d'entrer dans le périmètre ciblé par le sort", "Clarification": "", "_id": 120}, {"Incantation": "Repello Caelum", "Informulé ?": "", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Sceau de protection", "Découverte": "Bibliothèque", "Pré-requis": "Sorts 5", "Contre-sort": "Solvo Sigillum ou Custodia Absolvo", "Description": "Protège un périmètre des effets du climat", "Clarification": "", "_id": 121}, {"Incantation": "Salvio Resonabilis", "Informulé ?": "", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Sceau de protection", "Découverte": "Bibliothèque", "Pré-requis": "Sorts 5", "Contre-sort": "Solvo Sigillum ou Custodia Absolvo", "Description": "Empêche des sons de sortir du périmètre ciblé par le sort", "Clarification": "", "_id": 122}, {"Incantation": "Cave Inimicum", "Informulé ?": "", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Sceau de protection", "Découverte": "Professionnel", "Pré-requis": "Sorts 5", "Contre-sort": "Solvo Sigillum ou Custodia Absolvo", "Description": "Préviens le lanceur du sortilège d’une intrusion dans le périmètre ou a été lancé le sort", "Clarification": "", "_id": 123}, {"Incantation": "Cridru", "Informulé ?": "", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Sceau de protection", "Découverte": "Professionnel", "Pré-requis": "Sorts 5", "Contre-sort": "Solvo Sigillum ou Custodia Absolvo", "Description": "Un son strident retentit si quelqu'un pénètre dans le périmètre protégé par ce sort", "Clarification": "", "_id": 124}, {"Incantation": "Anticatimini", "Informulé ?": "", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Sceau de protection", "Découverte": "Réserve", "Pré-requis": "Sorts 5", "Contre-sort": "", "Description": "Lancé sur une pièce fermée, en interdit à quiconque l'accès tant que le lanceur du sort est à l'intérieur", "Clarification": "", "_id": 125}, {"Incantation": "Exanimo", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Cœur", "Catégorie": "Soin", "Découverte": "Professionnel", "Pré-requis": "Coeur 3", "Contre-sort": "", "Description": "Permet de calmer une victime de crise d'angoisse ou de terreur", "Clarification": "", "_id": 126}, {"Incantation": "Ferula", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Cœur", "Catégorie": "Soin", "Découverte": "Professionnel", "Pré-requis": "Cœur 2", "Contre-sort": "Finite", "Description": "Une attelle et des bandages apparaissent pour immobiliser un des membre de la cible", "Clarification": "", "_id": 127}, {"Incantation": "Torpéo", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Cœur", "Catégorie": "Soin", "Découverte": "Professionnel", "Pré-requis": "Cœur 3", "Contre-sort": "T ou Enervatum", "Description": "Plonge la cible dans un état paisible, comme un tranquilisant", "Clarification": "", "_id": 128}, {"Incantation": "Diagnosis", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Cœur", "Catégorie": "Soin", "Découverte": "Professionnel", "Pré-requis": "Cœur 3", "Contre-sort": "", "Description": "Lance un diagnostique sur la cible pour illuminer la source de la douleur ou l'endroit du sortilège nefaste", "Clarification": "", "_id": 129}, {"Incantation": "Surgito", "Informulé ?": "", "Niveau": "Intermédiaire", "Caractéristique": "Cœur", "Catégorie": "Soin", "Découverte": "Professionnel", "Pré-requis": "Cœur 3", "Contre-sort": "", "Description": "Soigne une victime de filtre d'amour", "Clarification": "", "_id": 130}, {"Incantation": "Anapnéo", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Cœur", "Catégorie": "Soin", "Découverte": "Professionnel", "Pré-requis": "Cœur 2", "Contre-sort": "", "Description": "Libère les voies respiratoires de la personne visé", "Clarification": "", "_id": 131}, {"Incantation": "Sessio Onis", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Cœur", "Catégorie": "Soin", "Découverte": "Professionnel", "Pré-requis": "Cœur 3", "Contre-sort": "T", "Description": "Fige une blessure pour que le sang arrête de couler ou que le sortilège ne se propage pas", "Clarification": "Ne fonctionne que quelques minutes", "_id": 132}, {"Incantation": "Riddikulus", "Informulé ?": "", "Niveau": "Intermédiaire", "Caractéristique": "Cœur", "Catégorie": "Sortilège", "Découverte": "Programme 5", "Pré-requis": "Cœur 3", "Contre-sort": "T ou Reparifor", "Description": "Modifie la cible vivante pour la rendre ridicule", "Clarification": "Permet de se débarasser des Epouvantards", "_id": 133}, {"Incantation": "Aducco", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Cœur", "Catégorie": "Sortilège", "Découverte": "Professionnel", "Pré-requis": "Soins 4", "Contre-sort": "", "Description": "Lancé sur un animal visible, celui-ci sera attiré par le lanceur et viendra naturellement jusqu'à lui", "Clarification": "", "_id": 134}, {"Incantation": "Hominum Revelio", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Cœur", "Catégorie": "Sortilège", "Découverte": "Programme 5", "Pré-requis": "Observation 3", "Contre-sort": "", "Description": "Révèle au sorcier la présence d’humain dans le lieu dans lequel il se trouve", "Clarification": "", "_id": 135}, {"Incantation": "Antiongulus", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Corps", "Catégorie": "Sortilège", "Découverte": "Professionnel", "Pré-requis": "", "Contre-sort": "", "Description": "Ce sort est utilisé pour couper les griffes d'un animal ou d'une créature", "Clarification": "", "_id": 136}, {"Incantation": "Obiratio", "Informulé ?": "", "Niveau": "Intermédiaire", "Caractéristique": "Corps", "Catégorie": "Sortilège", "Découverte": "Professionnel", "Pré-requis": "Vol 5", "Contre-sort": "", "Description": "Active et désactive un cognard", "Clarification": "", "_id": 137}, {"Incantation": "Velpernix", "Informulé ?": "", "Niveau": "Intermédiaire", "Caractéristique": "Corps", "Catégorie": "Sortilège", "Découverte": "Professionnel", "Pré-requis": "Vol 5", "Contre-sort": "", "Description": "Active et désactive un vif d'or", "Clarification": "", "_id": 138}, {"Incantation": "Ascendio", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Corps", "Catégorie": "Sortilège", "Découverte": "Bibliothèque", "Pré-requis": "Force 3", "Contre-sort": "", "Description": "Permet au porteur de la baguette de s’élever rapidement dans les airs", "Clarification": "", "_id": 139}, {"Incantation": "Sonorus", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Corps", "Catégorie": "Sortilège", "Découverte": "Bibliothèque", "Pré-requis": "", "Contre-sort": "T", "Description": "Augmente la portée et la puissance de la voix de la cible tant que le lanceur reste concentré sur la cible", "Clarification": "", "_id": 140}, {"Incantation": "Sourdinam", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Corps", "Catégorie": "Sortilège", "Découverte": "Bibliothèque", "Pré-requis": "", "Contre-sort": "T", "Description": "Réduit la portée et la puissance de la voix de la cible tant que le lanceur reste concentré sur la cible", "Clarification": "", "_id": 141}, {"Incantation": "Tabula Astrum", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Professionnel", "Pré-requis": "Astronomie 3", "Contre-sort": "T", "Description": "Projette au-dessus du lanceur une carte des constellations", "Clarification": "", "_id": 142}, {"Incantation": "Mobiliarbus", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Professionnel", "Pré-requis": "Botanique 2", "Contre-sort": "", "Description": "Version spécifique de Wingardium Leviosa pour les végétaux", "Clarification": "Déplace les végétaux sans les abîmer, avec les racines", "_id": 143}, {"Incantation": "Têtenbulle", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Bibliothèque", "Pré-requis": "Sorts 5", "Contre-sort": "T ou Finite", "Description": "Crée une bulle d’air permettant de respirer autour de la tête de la cible", "Clarification": "", "_id": 144}, {"Incantation": "Lumus Solem", "Informulé ?": "", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Bibliothèque", "Pré-requis": "", "Contre-sort": "T", "Description": "Fait apparaître une vive lumière comparable à celle du soleil pendant un court instant", "Clarification": "", "_id": 145}, {"Incantation": "Traductio", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Bibliothèque", "Pré-requis": "Esprit 4", "Contre-sort": "", "Description": "Traduit un texte d'une langue vivante inconnue en une langue vivante connue", "Clarification": "", "_id": 146}, {"Incantation": "Accio", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Programme 5", "Pré-requis": "", "Contre-sort": "", "Description": "Attire un objet pointé par la baguette, ou dont l’emplacement est connu", "Clarification": "Le sort est plus difficile pour les objets hors de la vue du lanceur", "_id": 147}, {"Incantation": "Globus", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Bibliothèque", "Pré-requis": "", "Contre-sort": "T ou Finite", "Description": "Fait apparaître une balle de lumière pouvant suivre le lanceur", "Clarification": "", "_id": 148}, {"Incantation": "Nox", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Bibliothèque", "Pré-requis": "Discrétion 3", "Contre-sort": "Finite", "Description": "Plonge dans les ténèbres un lieu en éteignant toutes les lumières y compris celles magiques", "Clarification": "", "_id": 149}, {"Incantation": "Incendio", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Programme 5", "Pré-requis": "", "Contre-sort": "T", "Description": "Produit une flamme au bout de la baguette", "Clarification": "", "_id": 150}, {"Incantation": "Muffliato", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Adulte", "Pré-requis": "Discrétion 3", "Contre-sort": "T ou Finite", "Description": "Englobe deux - et seulement deux - personnes temporairement, empêchant quiconque d'entendre leur conversation", "Clarification": "", "_id": 151}, {"Incantation": "Orchideus", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Adulte", "Pré-requis": "", "Contre-sort": "", "Description": "Fait apparaître un bouquet de fleurs", "Clarification": "", "_id": 152}, {"Incantation": "Appare Vestigium", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Bibliothèque", "Pré-requis": "Observation 2", "Contre-sort": "T", "Description": "Met en lumière des traces de pas récentes sur le sol", "Clarification": "", "_id": 153}, {"Incantation": "Avis", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Bibliothèque", "Pré-requis": "", "Contre-sort": "T ou Finite", "Description": "Fait apparaître des petits oiseaux gazouillant", "Clarification": "", "_id": 154}, {"Incantation": "Oblitero", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Bibliothèque", "Pré-requis": "", "Contre-sort": "", "Description": "Fait disparaître des traces de pas sur le sol (de boue, neige, poussière)", "Clarification": "", "_id": 155}, {"Incantation": "Obscuro", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Bibliothèque", "Pré-requis": "", "Contre-sort": "T ou Finite", "Description": "Permet d'occulter une fenêtre, une porte, une vitre", "Clarification": "", "_id": 156}, {"Incantation": "Notice-me-not", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Professionnel", "Pré-requis": "Discrétion 3", "Contre-sort": "T ou Finite", "Description": "Détourne l'attention des autres de soi, à moins qu'ils vous cherchent spécifiquement", "Clarification": "", "_id": 157}, {"Incantation": "Aguamenti", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Programme 4", "Pré-requis": "", "Contre-sort": "T", "Description": "Produit un jet d’eau plus ou moins puissant au bout de la baguette", "Clarification": "", "_id": 158}, {"Incantation": "Ignifugus", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Programme 4", "Pré-requis": "", "Contre-sort": "", "Description": "Permet d'éteindre des flammes non magiques", "Clarification": "", "_id": 159}, {"Incantation": "Inhumidifis", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Programme 4", "Pré-requis": "", "Contre-sort": "", "Description": "Permet d'assécher une flaque ou un petit plan d'eau", "Clarification": "", "_id": 160}, {"Incantation": "Evanesco", "Informulé ?": "O", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Réserve", "Pré-requis": "", "Contre-sort": "", "Description": "Fait disparaître un objet", "Clarification": "Celui-ci ne disparaît pas complètement, il est téléporté ailleurs, mais personne ne sait où", "_id": 161}, {"Incantation": "Lux Veritatis Revela", "Informulé ?": "", "Niveau": "Intermédiaire", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Réserve", "Pré-requis": "", "Contre-sort": "", "Description": "Révèle les écritures invisibles", "Clarification": "", "_id": 162}, {"Incantation": "Expecto Patronum", "Informulé ?": "O", "Niveau": "Avancé", "Caractéristique": "Cœur", "Catégorie": "Attaque", "Découverte": "Programme 6", "Pré-requis": "", "Contre-sort": "T", "Description": "Manifeste le Patronus du sorcier", "Clarification": "Seule protection efficace contre les détraqueurs, permet également d'envoyer des messages", "_id": 163}, {"Incantation": "Feudeymon", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Cœur", "Catégorie": "Attaque", "Découverte": "Interdit", "Pré-requis": "Cœur 6", "Contre-sort": "", "Description": "Fait apparaître des flammes vivantes se nourrissant de ce qu’elles brûlent", "Clarification": "", "_id": 164}, {"Incantation": "Alarte Ascendare", "Informulé ?": "O", "Niveau": "Avancé", "Caractéristique": "Corps", "Catégorie": "Attaque", "Découverte": "Programme 7", "Pré-requis": "", "Contre-sort": "", "Description": "Projette puissamment un objet ou être vivant à l’opposé du sorcier", "Clarification": "", "_id": 165}, {"Incantation": "Incarcerem", "Informulé ?": "O", "Niveau": "Avancé", "Caractéristique": "Corps", "Catégorie": "Attaque", "Découverte": "Programme 6", "Pré-requis": "", "Contre-sort": "Lashlabask", "Description": "Ligote avec des cordes et des chaînes magiques la personne visée", "Clarification": "", "_id": 166}, {"Incantation": "Bombarda", "Informulé ?": "O", "Niveau": "Avancé", "Caractéristique": "Corps", "Catégorie": "Attaque", "Découverte": "Programme 7", "Pré-requis": "Force 5", "Contre-sort": "", "Description": "Fait exploser une cible non vivante", "Clarification": "", "_id": 167}, {"Incantation": "Sectumsempra", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Corps", "Catégorie": "Attaque", "Découverte": "Interdit", "Pré-requis": "?", "Contre-sort": "Salveo Clemens", "Description": "Provoque de profondes lacérations sur le corps de la victime", "Clarification": "", "_id": 168}, {"Incantation": "Combustum Aeros", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Corps", "Catégorie": "Attaque", "Découverte": "Interdit", "Pré-requis": "?", "Contre-sort": "Salveo Clemens", "Description": "Le contact de l'air brûle sévèremment la cible", "Clarification": "", "_id": 169}, {"Incantation": "Conjonctivitis", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Corps", "Catégorie": "Attaque", "Découverte": "Interdit", "Pré-requis": "?", "Contre-sort": "", "Description": "Enflamme les yeux de la victime jusqu’à le rendre aveugle", "Clarification": "", "_id": 170}, {"Incantation": "Cutis Filum", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Corps", "Catégorie": "Attaque", "Découverte": "Interdit", "Pré-requis": "?", "Contre-sort": "Salveo Clemens", "Description": "Epluche lentement la peau de la cible en commençant par ses doigts", "Clarification": "", "_id": 171}, {"Incantation": "Fulmencio", "Informulé ?": "O", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Attaque", "Découverte": "Réserve", "Pré-requis": "Sorts 8", "Contre-sort": "", "Description": "Fait frapper la foudre à l'endroit ciblé", "Clarification": "", "_id": 172}, {"Incantation": "Salveo Clemens", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Cœur", "Catégorie": "Contre-sort", "Découverte": "Professionnel", "Pré-requis": "DCFM 6", "Contre-sort": "", "Description": "Un contre-sort très avancé contre la magie noire", "Clarification": "", "_id": 173}, {"Incantation": "Custodia Absolvo", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Contre-sort", "Découverte": "Réserve", "Pré-requis": "Esprit 6", "Contre-sort": "", "Description": "Un contre-sort très complexe permettant de briser le sceau de protection créé par un autre sorcier", "Clarification": "", "_id": 174}, {"Incantation": "Oclumens", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Cœur", "Catégorie": "Défense", "Découverte": "Professionnel", "Pré-requis": "Résilience 6", "Contre-sort": "T", "Description": "Permet de protéger son esprit d'intrusions magiques", "Clarification": "", "_id": 175}, {"Incantation": "Protego Horriblis", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Corps", "Catégorie": "Défense", "Découverte": "Réserve", "Pré-requis": "Endurance 6", "Contre-sort": "T", "Description": "Crée un dôme de protection impénétrable autour du lanceur", "Clarification": "Ne se déplace pas avec le lanceur et il ne peut en sortir sans y mettre un terme", "_id": 176}, {"Incantation": "Aegis", "Informulé ?": "O", "Niveau": "Avancé", "Caractéristique": "Corps", "Catégorie": "Défense", "Découverte": "Professionnel", "Pré-requis": "DCFM 7", "Contre-sort": "", "Description": "Projette un bouclier puissant quelques mètres dans la direction visée", "Clarification": "", "_id": 177}, {"Incantation": "Respello", "Informulé ?": "O", "Niveau": "Avancé", "Caractéristique": "Corps", "Catégorie": "Défense", "Découverte": "Programme 7", "Pré-requis": "Agilité 4", "Contre-sort": "", "Description": "Permet de rediriger un sort lancé sur le lanceur sur une troisième cible", "Clarification": "", "_id": 178}, {"Incantation": "Restituo Clementia", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Cœur", "Catégorie": "Métamorphose", "Découverte": "Réserve", "Pré-requis": "Cœur 4", "Contre-sort": "", "Description": "Redonne forme humaine à un animagus ou un humain métamorphosé en animal", "Clarification": "", "_id": 179}, {"Incantation": "Glamour", "Informulé ?": "O", "Niveau": "Avancé", "Caractéristique": "Cœur", "Catégorie": "Métamorphose", "Découverte": "Adulte", "Pré-requis": "", "Contre-sort": "Reparifor", "Description": "Permet de changer légérement des élements de son visage, la couleur de ses yeux, la taille de son nez, etc..", "Clarification": "", "_id": 180}, {"Incantation": "Pervolitentia", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Cœur", "Catégorie": "Métamorphose", "Découverte": "Professionnel", "Pré-requis": "Métamorphose 6", "Contre-sort": "", "Description": "Permet d'animer éternellement un tatouage fait récemment", "Clarification": "", "_id": 181}, {"Incantation": "Transfero", "Informulé ?": "O", "Niveau": "Avancé", "Caractéristique": "Cœur", "Catégorie": "Métamorphose", "Découverte": "Programme 7", "Pré-requis": "Métamorphose 6", "Contre-sort": "Reparifor", "Description": "Transforme une partie de son propre corps en membre d'un animal", "Clarification": "", "_id": 182}, {"Incantation": "Protean Mutatio", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Métamorphose", "Découverte": "Bibliothèque", "Pré-requis": "Esprit 7", "Contre-sort": "Finite", "Description": "Sort qui lie des objets en un réseau enchanté, faisant de chacun le reflet vivant des autres. Toute altération se propage à l’ensemble en temps réel.", "Clarification": "", "_id": 183}, {"Incantation": "Materia Aes", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Métamorphose", "Découverte": "Programme 6", "Pré-requis": "", "Contre-sort": "Finite", "Description": "Transforme le matériau d'un objet en un autre matériau", "Clarification": "", "_id": 184}, {"Incantation": "Forma Similis", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Métamorphose", "Découverte": "Réserve", "Pré-requis": "", "Contre-sort": "Finite", "Description": "Modifie l’apparence d’un objet selon une autre source.", "Clarification": "", "_id": 185}, {"Incantation": "Extenso Inoculis", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Métamorphose", "Découverte": "Bibliothèque", "Pré-requis": "Métamorphose 6", "Contre-sort": "Finite", "Description": "Permet d'accroître la contenance d'un objet sans en modifier l'apparence", "Clarification": "", "_id": 186}, {"Incantation": "Linguanima", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Métamorphose", "Découverte": "Professionnel", "Pré-requis": "", "Contre-sort": "Finite", "Description": "Donne la parole à un objet", "Clarification": "L'objet n'est pas intelligent et peut juste répéter la phrase prononcée après la formule par le lanceur", "_id": 187}, {"Incantation": "Piertotum Locomotor", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Métamorphose", "Découverte": "Professionnel", "Pré-requis": "Intimidation 5", "Contre-sort": "T", "Description": "Anime une statue ou une armure pour effectuer la volonté du lanceur", "Clarification": "", "_id": 188}, {"Incantation": "Translatio", "Informulé ?": "O", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Métamorphose", "Découverte": "Programme 7", "Pré-requis": "Métamorphose 7", "Contre-sort": "Finite ou Reparifor", "Description": "Transplante une partie d’un corps ou d’un objet sur un autre", "Clarification": "", "_id": 189}, {"Incantation": "Glisseo", "Informulé ?": "O", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Métamorphose", "Découverte": "Bibliothèque", "Pré-requis": "", "Contre-sort": "T", "Description": "Transforme un escalier en toboggan", "Clarification": "", "_id": 190}, {"Incantation": "Penetro Nam Verum", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Sceau de protection", "Découverte": "Professionnel", "Pré-requis": "Sorts 8", "Contre-sort": "Solvo Sigillum ou Custodia Absolvo", "Description": "Fait disparaître les effets de glamour, de métamorphose ou de Polynectar sur toute personne pénetrant dans le périmètre du sort", "Clarification": "", "_id": 191}, {"Incantation": "Repello Moldum", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Sceau de protection", "Découverte": "Professionnel", "Pré-requis": "Sorts 8", "Contre-sort": "Solvo Sigillum ou Custodia Absolvo", "Description": "Repousse les moldus de la zone ciblée, leur faisant oublier ce qu'ils comptaient faire à cet endroit", "Clarification": "", "_id": 192}, {"Incantation": "Salveo Spectrum", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Sceau de protection", "Découverte": "Professionnel", "Pré-requis": "Sorts 8", "Contre-sort": "Solvo Sigillum ou Custodia Absolvo", "Description": "Empêche tout être vivant de transplaner à destination ou au départ d'un périmètre précis", "Clarification": "", "_id": 193}, {"Incantation": "Terminus ...", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Sceau de protection", "Découverte": "Professionnel", "Pré-requis": "Sorts 8", "Contre-sort": "Solvo Sigillum ou Custodia Absolvo", "Description": "Trace une ligne dorée infranchissable pour quiconque n’a pas l’âge, le sexe, la maison, etc... choisi par le lanceur.", "Clarification": "", "_id": 194}, {"Incantation": "Alagrante", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Sceau de protection", "Découverte": "Réserve", "Pré-requis": "Sorts 8", "Contre-sort": "Solvo Sigillum ou Custodia Absolvo", "Description": "Lancé sur un objet inanimé, toutes les personnes qui le toucheront seront victimes de brulûres sérieuses", "Clarification": "", "_id": 195}, {"Incantation": "Salveo Maleficia", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Sceau de protection", "Découverte": "Réserve", "Pré-requis": "Sorts 8", "Contre-sort": "Solvo Sigillum ou Custodia Absolvo", "Description": "Empêche tout sortilège interdit d'être lancé dans un périmètre précis tant que le lanceur y est présent", "Clarification": "", "_id": 196}, {"Incantation": "Why Try", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Sceau de protection", "Découverte": "Réserve", "Pré-requis": "Sorts 8", "Contre-sort": "Solvo Sigillum ou Custodia Absolvo", "Description": "Lancé sur une zone, empêche toute personne de penser qu'ils peuvent régler un problème ou résoudre une énigme", "Clarification": "La chose en question leur paraitra impossible à résoudre.", "_id": 197}, {"Incantation": "Fidelitas", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Sceau de protection", "Découverte": "Professionnel", "Pré-requis": "Sorts 8", "Contre-sort": "Solvo Sigillum ou Custodia Absolvo", "Description": "Permet de confier un secret à une personne qui devient gardien du secret", "Clarification": "Tant que ce dernier ne le révèle pas, le secret ne peut être découvert", "_id": 198}, {"Incantation": "Videntrailles", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Cœur", "Catégorie": "Soin", "Découverte": "Professionnel", "Pré-requis": "", "Contre-sort": "", "Description": "Purge l'estomac de la victime", "Clarification": "", "_id": 199}, {"Incantation": "Brackium Emendo", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Cœur", "Catégorie": "Soin", "Découverte": "Professionnel", "Pré-requis": "Cœur 4", "Contre-sort": "", "Description": "Répare un os brisé", "Clarification": "", "_id": 200}, {"Incantation": "Foetulentia", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Cœur", "Catégorie": "Soin", "Découverte": "Professionnel", "Pré-requis": "Cœur 4", "Contre-sort": "", "Description": "Soigne une infection grave", "Clarification": "", "_id": 201}, {"Incantation": "Prodormio", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Cœur", "Catégorie": "Soin", "Découverte": "Professionnel", "Pré-requis": "Cœur 4", "Contre-sort": "T", "Description": "Anesthésie complètement la cible", "Clarification": "", "_id": 202}, {"Incantation": "Vulnera Sanentur", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Cœur", "Catégorie": "Soin", "Découverte": "Professionnel", "Pré-requis": "Cœur 5", "Contre-sort": "", "Description": "Purifie et réaspire le sang d'une blessure à l'intérieur du corps si celui-ci est encore à proximité", "Clarification": "", "_id": 203}, {"Incantation": "Corrumpō", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Cœur", "Catégorie": "Sortilège", "Découverte": "Interdit", "Pré-requis": "Tromperie 5", "Contre-sort": "T", "Description": "Rend la cible plus enclin à utiliser de la magie noire ou à réaliser des actes immoraux", "Clarification": "", "_id": 204}, {"Incantation": "Mendiscius Gnosco", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Cœur", "Catégorie": "Sortilège", "Découverte": "Professionnel", "Pré-requis": "", "Contre-sort": "", "Description": "Répare un tableau magique abîmé", "Clarification": "", "_id": 205}, {"Incantation": "Permanens Timbris", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Cœur", "Catégorie": "Sortilège", "Découverte": "Professionnel", "Pré-requis": "", "Contre-sort": "T", "Description": "Transforme sa baguette magique en dermographe pour tatouer une personne", "Clarification": "", "_id": 206}, {"Incantation": "Oubliettes", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Cœur", "Catégorie": "Sortilège", "Découverte": "Professionnel", "Pré-requis": "Persuasion 6", "Contre-sort": "", "Description": "Efface ou modifie la mémoire de la personne ciblée", "Clarification": "", "_id": 207}, {"Incantation": "Gaudium", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Cœur", "Catégorie": "Sortilège", "Découverte": "Réserve", "Pré-requis": "Tromperie 8", "Contre-sort": "T", "Description": "Rend la personne ciblée heureuse. Ce sortilège est règlementé par le ministère de la magie", "Clarification": "", "_id": 208}, {"Incantation": "Hominun Aetas Mensura", "Informulé ?": "O", "Niveau": "Avancé", "Caractéristique": "Cœur", "Catégorie": "Sortilège", "Découverte": "Bibliothèque", "Pré-requis": "Divination 4", "Contre-sort": "T", "Description": "Fait apparaître l'âge de la personne ciblée", "Clarification": "", "_id": 209}, {"Incantation": "Sacramentus Sactus", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Cœur", "Catégorie": "Sortilège", "Découverte": "Interdit", "Pré-requis": "Cœur 5", "Contre-sort": "", "Description": "Lie plusieurs personnes par un serment, rompre ce dernier entraîne la mort", "Clarification": "", "_id": 210}, {"Incantation": "Deprimo", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Corps", "Catégorie": "Sortilège", "Découverte": "Adulte", "Pré-requis": "Force 5", "Contre-sort": "T", "Description": "Une très forte pression s’exerce contre la surface ciblé, pouvant aller jusqu’à sa déformation ou sa destruction", "Clarification": "", "_id": 211}, {"Incantation": "Waddiwasi", "Informulé ?": "O", "Niveau": "Avancé", "Caractéristique": "Corps", "Catégorie": "Sortilège", "Découverte": "Adulte", "Pré-requis": "", "Contre-sort": "", "Description": "Projette un petit objet à la vitesse d’une balle de fusil", "Clarification": "", "_id": 212}, {"Incantation": "Aedificatio", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Corps", "Catégorie": "Sortilège", "Découverte": "Professionnel", "Pré-requis": "Force 5", "Contre-sort": "", "Description": "Assemble des matériaux de construction ensemble. Utilisé pour de gros travaux", "Clarification": "", "_id": 213}, {"Incantation": "Circumrota", "Informulé ?": "O", "Niveau": "Avancé", "Caractéristique": "Corps", "Catégorie": "Sortilège", "Découverte": "Bibliothèque", "Pré-requis": "Force 4", "Contre-sort": "", "Description": "Permet de faire pivoter un lourd objet", "Clarification": "", "_id": 214}, {"Incantation": "Detectus Mala Voluntate", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Réserve", "Pré-requis": "", "Contre-sort": "", "Description": "Détecte une intention malicieuse sur la cible non vivante. Le lanceur ne saura pas techniquement si la cible contient du poison ou une malédiction, mais il saura que la cible a été \"modifiée\" avec intention de nuire", "Clarification": "", "_id": 215}, {"Incantation": "Quilegere", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Réserve", "Pré-requis": "", "Contre-sort": "", "Description": "Lancé sur une lettre, un parchemin, permet au lanceur de savoir si le contenu a été lu par quelqu'un avant lui (en dehors de la personne qui a rédigé le contenu)", "Clarification": "", "_id": 216}, {"Incantation": "Quaerō Indiculum", "Informulé ?": "O", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Bibliothèque", "Pré-requis": "Runes 6", "Contre-sort": "Finite", "Description": "Fait apparaître un index des volumes présents dans la pièce et permet de chercher rapidement quelque chose de précis dedans (ne fonctionne que dans une librairie, bibliothèque, archive, ...)", "Clarification": "", "_id": 217}, {"Incantation": "Legilimens", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Professionnel", "Pré-requis": "Esprit 5", "Contre-sort": "", "Description": "Permet de fouiller l’esprit de la personne visée", "Clarification": "", "_id": 218}, {"Incantation": "Adsector Vestigo", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Réserve", "Pré-requis": "", "Contre-sort": "Finite", "Description": "Transforme un petit objet en traqueur. Répéter l'incantation et la baguette du lanceur pointera vers cet objet.", "Clarification": "", "_id": 219}, {"Incantation": "Gemino", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Réserve", "Pré-requis": "", "Contre-sort": "T", "Description": "Permet de copier parfaitement un objet. La copie disparaitra au bout de quelques jours", "Clarification": "", "_id": 220}, {"Incantation": "Specialis Revelio", "Informulé ?": "O", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Professionnel", "Pré-requis": "Potions 8", "Contre-sort": "", "Description": "Le lanceur du sort connait tous les ingrédients de la potion visée", "Clarification": "", "_id": 221}, {"Incantation": "Lacarnum Inflamarae", "Informulé ?": "O", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Bibliothèque", "Pré-requis": "", "Contre-sort": "T ou Finite", "Description": "L’objet inanimé ciblé prend feu", "Clarification": "", "_id": 222}, {"Incantation": "Prior Incantum", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Professionnel", "Pré-requis": "", "Contre-sort": "", "Description": "Révèle le dernier sort lancé par une baguette de sorcier", "Clarification": "", "_id": 223}, {"Incantation": "Magna", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Réserve", "Pré-requis": "Sorts 6", "Contre-sort": "T", "Description": "Produit une lumière intense et aveuglante", "Clarification": "", "_id": 224}, {"Incantation": "Meteorribilis Recanto", "Informulé ?": "O", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Bibliothèque", "Pré-requis": "", "Contre-sort": "", "Description": "Calme les intempéries, y compris magiques", "Clarification": "", "_id": 225}, {"Incantation": "Portus", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Interdit", "Pré-requis": "Arithmancie 6", "Contre-sort": "", "Description": "Transforme un objet en portoloin. Ce sortilège est règlementé par le ministère de la magie", "Clarification": "", "_id": 226}, {"Incantation": "Auscultō", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Programme 6", "Pré-requis": "", "Contre-sort": "T", "Description": "Amplifie grandement les sons provenant de l'endroit ciblé par la baguette seulement pour le lanceur", "Clarification": "", "_id": 227}, {"Incantation": "Nebulus", "Informulé ?": "O", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Programme 6", "Pré-requis": "", "Contre-sort": "T ou Finite", "Description": "Fait apparaître un épais brouillard", "Clarification": "", "_id": 228}, {"Incantation": "Aresto Momentum", "Informulé ?": "O", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Programme 7", "Pré-requis": "", "Contre-sort": "T", "Description": "Ralentit quelques instants le temps pour un objet ou un être vivant", "Clarification": "", "_id": 229}, {"Incantation": "Obicio", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Programme 7", "Pré-requis": "", "Contre-sort": "T", "Description": "Fait apparaître un objet simple", "Clarification": "Un objet du quotidien qui disparaitra au bout de quelques heures", "_id": 230}, {"Incantation": "Asurdiato", "Informulé ?": "O", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Réserve", "Pré-requis": "", "Contre-sort": "T", "Description": "Provoque un bourdonnement dans l’oreille d’une personne suffisant pour l'empêcher d’entendre une conversation", "Clarification": "", "_id": 231}, {"Incantation": "Harmonia Necere Passus", "Informulé ?": "", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Réserve", "Pré-requis": "", "Contre-sort": "", "Description": "Transporte le contenu d'un contenant dans un autre contenant identique de destination", "Clarification": "", "_id": 232}, {"Incantation": "Vanis", "Informulé ?": "O", "Niveau": "Avancé", "Caractéristique": "Esprit", "Catégorie": "Sortilège", "Découverte": "Réserve", "Pré-requis": "Esprit 6", "Contre-sort": "Finite", "Description": "Rend un objet invisible", "Clarification": "", "_id": 233}];
+const HEADERS = ["Incantation", "Informulé ?", "Niveau", "Caractéristique", "Catégorie", "Découverte", "Pré-requis", "Contre-sort"];
+
+const FILTERS = ["Niveau", "Caractéristique", "Catégorie", "Découverte", "Informulé ?", "Contre-sort"];
+let state = {
+  q: "",
+  filters: Object.fromEntries(FILTERS.map(f => [f, ""])),
+  sortKey: "Incantation",
+  sortDir: "asc"
+};
+
+const normalize = (s) => String(s ?? "")
+  .toLowerCase()
+  .normalize("NFD")
+  .replace(/[\u0300-\u036f]/g, "")
+  .replace(/[’']/g, "'")
+  .trim();
+
+function escapeHtml(s) {
+  return String(s ?? "").replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+
+function highlight(text, q) {
+  const value = escapeHtml(text || "");
+  const terms = normalize(q).split(/\s+/).filter(Boolean);
+  if (!terms.length) return value || '<span class="empty">—</span>';
+  let out = value;
+  // Accent-insensitive highlight is complex after escaping; use simple visible term matching for safety.
+  for (const term of terms) {
+    if (term.length < 2) continue;
+    const rx = new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "ig");
+    out = out.replace(rx, "<mark>$1</mark>");
+  }
+  return out || '<span class="empty">—</span>';
+}
+
+function fieldText(row) {
+  return [...HEADERS.map(h => row[h] ?? ""), row["Description"] ?? "", row["Clarification"] ?? ""].join(" ");
+}
+
+function matchesSearch(row) {
+  const q = normalize(state.q);
+  if (!q) return true;
+  const haystack = normalize(fieldText(row));
+  return q.split(/\s+/).filter(Boolean).every(term => haystack.includes(term));
+}
+
+function matchesFilters(row) {
+  return Object.entries(state.filters).every(([k,v]) => !v || String(row[k] ?? "") === v);
+}
+
+function sortRows(rows) {
+  const {sortKey, sortDir} = state;
+  const dir = sortDir === "desc" ? -1 : 1;
+  return [...rows].sort((a,b) => {
+    let av = String(a[sortKey] ?? "");
+    let bv = String(b[sortKey] ?? "");
+    if (sortKey === "Niveau") {
+      av = parseInt(av, 10) || 0; bv = parseInt(bv, 10) || 0;
+      return (av - bv) * dir || String(a.Incantation).localeCompare(String(b.Incantation), "fr");
+    }
+    return av.localeCompare(bv, "fr", {numeric:true, sensitivity:"base"}) * dir;
+  });
+}
+
+
+const CATEGORY_EMOJIS = {
+  "Attaque": "⚔️",
+  "Contre-sort": "🪄",
+  "Cours de récré": "🎭",
+  "Domestique": "🧹",
+  "Défense": "🛡️",
+  "Métamorphose": "🦋",
+  "Sceau de protection": "🔏",
+  "Soin": "✨",
+  "Sortilège": "📜"
+};
+
+function levelClass(value) {
+  const v = normalize(value);
+  if (v.includes("basique")) return "level-basique";
+  if (v.includes("intermediaire")) return "level-intermediaire";
+  if (v.includes("avance")) return "level-avance";
+  return "level-other";
+}
+
+function levelBadge(value) {
+  return `<span class="level-badge ${levelClass(value)}">${highlight(value, state.q)}</span>`;
+}
+
+function categoryWithEmoji(value) {
+  const emoji = CATEGORY_EMOJIS[value] || "📜";
+  return `${highlight(value, state.q)}<span class="category-emoji">${emoji}</span>`;
+}
+
+function uniqueValues(key) {
+  return [...new Set(DATA.map(r => r[key]).filter(v => v !== undefined && v !== null && String(v).trim() !== "").map(v => String(v).trim()))]
+    .sort((a,b) => a.localeCompare(b, "fr", {numeric:true, sensitivity:"base"}));
+}
+
+function buildFilters() {
+  const box = document.getElementById("filters");
+  box.innerHTML = "";
+  for (const key of FILTERS) {
+    const sel = document.createElement("select");
+    sel.innerHTML = `<option value="">${key} : tous</option>` + uniqueValues(key).map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join("");
+    sel.addEventListener("change", () => { state.filters[key] = sel.value; render(); });
+    box.appendChild(sel);
+  }
+}
+
+function buildHeader() {
+  const tr = document.getElementById("thead");
+  tr.innerHTML = HEADERS.map(h => `<th data-key="${escapeHtml(h)}" class="${["Informulé ?","Niveau","Caractéristique","Catégorie"].includes(h) ? "center-col" : ""}">${escapeHtml(h)} <span class="sortmark"></span></th>`).join("");
+  tr.querySelectorAll("th").forEach(th => {
+    th.addEventListener("click", () => {
+      const key = th.dataset.key;
+      if (state.sortKey === key) state.sortDir = state.sortDir === "asc" ? "desc" : "asc";
+      else { state.sortKey = key; state.sortDir = "asc"; }
+      document.getElementById("sortSelect").value = `${state.sortKey}|${state.sortDir}`;
+      render();
+    });
+  });
+}
+
+function cellClass(header, value) {
+  if (header === "Incantation") return "spell";
+  if (header === "Description") return "desc";
+  if (header === "Clarification") return "clarif";
+  if (header === "Caractéristique") return "car-" + String(value || "").replace(/[^\p{L}]/gu,"");
+  return "";
+}
+
+function cellContent(header, value) {
+  const txt = value || "";
+  if (!txt) return '<span class="empty">—</span>';
+  if (header === "Niveau") return levelBadge(txt);
+  if (header === "Catégorie") return `<span class="tag">${categoryWithEmoji(txt)}</span>`;
+  if (["Caractéristique","Découverte","Informulé ?","Contre-sort","Pré-requis"].includes(header)) {
+    return `<span class="tag">${highlight(txt, state.q)}</span>`;
+  }
+  return highlight(txt, state.q);
+}
+
+function render() {
+  let filtered = DATA.filter(matchesSearch).filter(matchesFilters);
+  filtered = sortRows(filtered);
+  const tbody = document.getElementById("tbody");
+  const visibleRows = filtered.map(row => {
+    const mainRow = `<tr>${HEADERS.map(h => `<td class="${( ["Informulé ?","Niveau","Caractéristique","Catégorie"].includes(h) ? "center-col " : "" ) + cellClass(h, row[h])}">${cellContent(h, row[h])}</td>`).join("")}</tr>`;
+    const desc = row["Description"] || "";
+    const clarif = row["Clarification"] || "";
+    const detailRow = `<tr class="detail-row"><td colspan="${HEADERS.length}">
+      <div class="detail-content">${desc ? highlight(desc, state.q) : '<span class="empty">Pas de description.</span>'}</div>
+      ${clarif ? `<div class="clarif-line"><strong>Clarification :</strong> ${highlight(clarif, state.q)}</div>` : ""}
+    </td></tr>`;
+    return mainRow + detailRow;
+  }).join("");
+  tbody.innerHTML = visibleRows;
+  document.getElementById("noResults").hidden = filtered.length !== 0;
+  document.getElementById("spellTable").hidden = filtered.length === 0;
+  document.getElementById("count").textContent = `${filtered.length} sort${filtered.length > 1 ? "s" : ""} affiché${filtered.length > 1 ? "s" : ""} / ${DATA.length}`;
+  document.querySelectorAll("th").forEach(th => {
+    const mark = th.querySelector(".sortmark");
+    mark.textContent = th.dataset.key === state.sortKey ? (state.sortDir === "asc" ? " ↑" : " ↓") : "";
+  });
+}
+
+document.getElementById("search").addEventListener("input", e => { state.q = e.target.value; render(); });
+document.getElementById("sortSelect").addEventListener("change", e => {
+  const [key, dir] = e.target.value.split("|");
+  state.sortKey = key; state.sortDir = dir; render();
+});
+document.getElementById("reset").addEventListener("click", () => {
+  state.q = ""; state.filters = Object.fromEntries(FILTERS.map(f => [f, ""])); state.sortKey = "Incantation"; state.sortDir = "asc";
+  document.getElementById("search").value = "";
+  document.getElementById("sortSelect").value = "Incantation|asc";
+  buildFilters();
+  render();
+});
+
+buildHeader();
+buildFilters();
+render();
+</script>
+</body>
+</html>
